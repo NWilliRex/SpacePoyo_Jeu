@@ -6,7 +6,7 @@ const groundTiles = new PIXI.tilemap.CompositeRectTileLayer(0, PIXI.utils.Textur
 const platforms = [];
 let playerTankSprite;
 let isJumping = false;
-let jumpHeight = 200;
+let jumpHeight = 235;
 const jumpSpeed = 5;
 const playerOffsetX = 25;
 let playerOffsetY = 730;
@@ -15,11 +15,9 @@ const maxX = 945;
 const minY = 730;
 const maxY = 0;
 let score = 0;
+let lives = 3;
 
-const appID = "TODO";
-let currentSession;
 let deltaOffset = 5;
-const namespace1 = "urn:x-cast:spacepoyo";
 
 const app = new PIXI.Application({ width: resolutionX, height: resolutionY, backgroundColor: 0x1099bb });
 document.getElementById("pixie-container").appendChild(app.view);
@@ -69,16 +67,14 @@ function createPlatform(x, y, width, height, color) {
     app.stage.addChild(platform);
     platforms.push(platform);
     console.log("Plateforme créée : x = " + x + ", y = " + y + ", largeur = " + width + ", hauteur = " + height);
-    
+
 }
 
 function createSingleRandomPlatform(y) {
-    const platformColors = [0xFF0000, 0x00FF00, 0x0000FF]; 
+    const platformColors = [0x9370db, 0x000080,0xFF3366]; 
     const platformWidth = 200;
     const platformHeight = 10;
     let x = Math.random() * (maxX - minX) + minX; 
-    
-  
     const color = platformColors[Math.floor(Math.random() * platformColors.length)]; 
     createPlatform(x, y, platformWidth, platformHeight, color);
 }
@@ -101,37 +97,31 @@ function jump() {
     }
 }
 
-
-
 function jumpAnimation() {
     const jumpInterval = setInterval(() => {
         let targetHeight = playerOffsetY - jumpHeight; 
         const collisionIndex = checkPlatformCollision(); 
         
-        
         if (collisionIndex !== -1) {
-        
             const platform = platforms[collisionIndex];
-            targetHeight = platform.y - jumpHeight ; 
-            console.log("Plateforme détectée. Hauteur de saut ajustée à la hauteur de la plateforme.");
-            console.log("Hauteur de la plateforme:", platform.y);
-            
+            targetHeight = platform.y - jumpHeight; 
             playerOffsetY = platform.y;
-             
-            app.stage.removeChild(platforms.shift());
+
+            if (collisionIndex === 1 && platforms.length > 0) { 
+                app.stage.removeChild(platforms[0]);
+                platforms.splice(0, 1); 
+            }
         }
-        
-        console.log("Hauteur de saut cible:", targetHeight);
 
         if (playerTankSprite.y <= targetHeight) {
             clearInterval(jumpInterval);
             fallAnimation();
         } else {
             playerTankSprite.y -= jumpSpeed;
+            
         }
     }, 20);
 }
-
 
 
 function isOnPlatform() {
@@ -162,25 +152,46 @@ function updateScoreDisplay() {
         scoreElement.textContent = "Score: " + score;
     }
 }
+
+function updateLivesDisplay() {
+    const livesElement = document.getElementById("lives"); 
+    if (livesElement) {
+        livesElement.textContent = "Vies: " + lives;
+    }
+}
+
+updateLivesDisplay();
+
+
 function fallAnimation() {
     const fallInterval = setInterval(() => {
         let collisionIndex = checkPlatformCollision();
         
         if (collisionIndex !== -1) {
-            
             clearInterval(fallInterval);
             const platform = platforms[collisionIndex];
             playerTankSprite.y = platform.y - playerTankSprite.height;
+          
             incrementScore(); 
             isJumping = false;
-            createSingleRandomPlatform(platform.y-100);
-            ;
+            let newY = platform.y - 100;
+            if (score % 7 === 0) {
+                newY = 700;
+            }
+            createSingleRandomPlatform(newY);
         } else {
             playerTankSprite.y += jumpSpeed;
             if (playerTankSprite.y >= minY) {
                 clearInterval(fallInterval);
                 playerTankSprite.y = minY;
                 isJumping = false;
+                
+                lives--;
+                updateLivesDisplay();
+                if (lives <= 0) {
+                    
+                    app.stage.removeChild(playerTankSprite);
+                }
             }
         }
     }, 20);
@@ -202,31 +213,33 @@ function checkPlatformCollision() {
 }
 
 function moveLeft() {
+    const moveSpeed = 15; 
     if (isOnPlatform()) {
         let collisionIndex = checkPlatformCollision();
         let platform = platforms[collisionIndex];
         
         if (playerTankSprite.x - deltaOffset >= platform.x) {
-            playerTankSprite.x -= deltaOffset + 5;
+            playerTankSprite.x -= deltaOffset + moveSpeed; 
         }
     } else {
         if (playerTankSprite.x - deltaOffset >= minX) {
-            playerTankSprite.x -= deltaOffset + 5;
+            playerTankSprite.x -= deltaOffset + moveSpeed; 
         }
     }
 }
 
 function moveRight() {
+    const moveSpeed = 15; 
     if (isOnPlatform()) {
         let collisionIndex = checkPlatformCollision();
         let platform = platforms[collisionIndex];
         if (playerTankSprite.x + playerTankSprite.width + deltaOffset <= platform.x + platform.width) {
-            playerTankSprite.x += deltaOffset + 5;
+            playerTankSprite.x += deltaOffset + moveSpeed;
         }
     } else {
         
         if (playerTankSprite.x + deltaOffset + playerTankSprite.width <= maxX) {
-            playerTankSprite.x += deltaOffset + 5;
+            playerTankSprite.x += deltaOffset + moveSpeed; 
         }
     }
 }

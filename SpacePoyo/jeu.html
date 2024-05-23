@@ -4,15 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>SpacePoyo</title>
+    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
 </head>
 <body>
     <div id="pixie-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.umd.js"></script>
     <script src="jeuScript.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script type="text/javascript">
+        const context = cast.framework.CastReceiverContext.getInstance();
+        context.addCustomMessageListener('urn:x-cast:SpacePoyo', (event) => {
+            const message = event.data;
+            // Prendre le message et effectuer l'action
+        })
+    </script>
     <p id="score">Score: 0</p>
+    <p id="lives">Vies: 3</p>
     
    
 </body>
