@@ -16,7 +16,20 @@
         const context = cast.framework.CastReceiverContext.getInstance();
         context.addCustomMessageListener('urn:x-cast:SpacePoyo', (event) => {
             const message = event.data;
+            switch(message.movement){
+                case "left":
+                    moveLeft() 
+                case "ArrowLeft":
+                    moveLeft();
+                case "ArrowRight":
+                    moveRight();
+                case "ArrowUp":
+                    jump();
+            }
+
+            
             // Prendre le message et effectuer l'action
+            context.start();
         })
     </script>
     <p id="score">Score: 0</p>
